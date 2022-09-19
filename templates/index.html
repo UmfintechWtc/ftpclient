@@ -1,0 +1,28 @@
+<script src="https://cdn.staticfile.org/jquery/1.10.2/jquery.min.js"></script>
+<script>
+$(document).ready(function(){
+  $("form").submit(function(){
+    alert("提交");
+  });
+});
+</script>
+<div>
+    <div >
+        <h1>执行命令</h1>
+        <form id="command_form" method="POST" action="/">
+            <div>
+                <input name="cmd" type="text" placeholder="命令" value="{{ cmd }}">
+                <span>@</span>
+                <span>
+                    <input name="submit"type="submit" value="执行" />
+                </span>
+            </div>
+        </form>
+    </div>
+    <div id="result">
+        <h3>命令结果</h3>
+        <textarea rows="20" cols="100">
+                {{ result }}
+        </textarea>
+    </div>
+</div>
