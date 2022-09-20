@@ -1,31 +1,47 @@
 <script src="https://cdn.staticfile.org/jquery/1.10.2/jquery.min.js"></script>
 <script>
-<!--$(document).ready(function(){-->
-<!--  $("form").submit(function(){-->
-<!--    alert("提交");-->
-<!--  });-->
-<!--});-->
-$("form").submit(function(e){
-    e.preventDefault()
-    alert("提交");
-});
+$(document).ready(function () {
+    $('form').submit(function (e) {
+      e.preventDefault()
+      console.log($('#command_form').serialize())
+      $.ajax({
+        //几个参数需要注意一下
+        type: 'POST', //方法类型
+        dataType: 'json', //预期服务器返回的数据类型
+        url: '/index', //url
+        data: $('#command_form').serialize(),
+        success: function (result) {
+          console.log(result)
+          $('#textarea').val(result)
+        },
+      })
+    })
+  })
 </script>
 <div>
     <div >
-        <h1>执行命令</h1>
+        <h3>执行命令</h3>
         <form id="command_form" method="POST" action="/">
             <div>
-                <input name="cmd" type="text" placeholder="命令" value="{{ cmd }}">
-                <span>@</span>
+                <input name="cmd" type="text" placeholder="命令" value="{{ cmd }}" />
                 <span>
                     <input name="submit"type="submit" value="执行" />
                 </span>
             </div>
         </form>
     </div>
+    <div >
+        <h3>上传文件</h3>
+        <form id="command_put" method="POST" action="/">
+            <div>
+                <input name="filename" type="file" />
+                <input name="submit" type="submit" value="上传" />
+            </div>
+        </form>
+    </div>
     <div id="result">
         <h3>命令结果</h3>
-        <textarea rows="20" cols="100">
+        <textarea rows="20" cols="100" id="textarea">
                 {{ result }}
         </textarea>
     </div>

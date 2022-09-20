@@ -34,12 +34,11 @@ class ConnftpClient:
             self.client.connect((self.host, int(self.port)))
             res = self.client.recv(self.buffer).decode()
             if res.startswith("220"):
-                print("连接FTP地址 {}:{} 成功".format(self.host, self.port))
+                return "连接FTP地址 {}:{} 成功".format(self.host, self.port)
             else:
-                print(res)
+                return res
         except Exception as e:
-            print("连接FTP地址 {}:{} 异常, 请检查FTP服务端网络地址是否正常".format(self.host, self.port))
-            exit()
+            return "连接FTP地址 {}:{} 异常, 请检查FTP服务端网络地址是否正常".format(self.host, self.port)
 
     def _login_user(self):
         """
@@ -50,10 +49,9 @@ class ConnftpClient:
         self.client.sendall(login_username.encode())
         rsp = self.client.recv(self.buffer).decode()
         if rsp.startswith("331"):
-            print("{}用户访问FTP地址 {}:{} 成功".format(username, self.host, self.port))
+            return "{}用户访问FTP地址 {}:{} 成功".format(username, self.host, self.port)
         else:
-            print("访问FTP地址 {}:{}失败，请检查FTP登录用户名{}是否正常".format(self.host, self.port, username))
-            exit()
+            return "访问FTP地址 {}:{}失败，请检查FTP登录用户名{}是否正常".format(self.host, self.port, username)
 
     def _login_pass(self):
         """
@@ -65,13 +63,11 @@ class ConnftpClient:
             self.client.sendall(login_password.encode())
             rsp = self.client.recv(self.buffer).decode()
             if rsp.startswith("5"):
-                print("认证FTP地址 {}:{}失败，请检查FTP登录用户密码是否正常".format(self.host, self.port))
-                exit()
+                return "认证FTP地址 {}:{}失败，请检查FTP登录用户密码是否正常".format(self.host, self.port)
             else:
-                print("认证FTP地址 {}:{} 成功".format(self.host, self.port, password))
+                return "认证FTP地址 {}:{} 成功".format(self.host, self.port, password)
         except Exception as e:
-            print("访问FTP地址 {}:{} 异常, 请检查用户密码是否正常".format(self.host, self.port))
-            exit()
+            return "访问FTP地址 {}:{} 异常, 请检查用户密码是否正常".format(self.host, self.port)
 
     def _login_mode(self, mode="PASV"):
         """
@@ -113,7 +109,7 @@ class ConnftpClient:
         · cd - Changes the working directory on the remote computer
         · quit - Ends the FTP session with the remote computer and exits ftp (same as "bye")
         """
-        print(help_msg)
+        return help_msg
 
     def list_files(self, path=None):
         """
@@ -147,7 +143,7 @@ class ConnftpClient:
         :return: 切换后的工作路径
         """
         if path is None or path == "":
-            print("需要指明切换路径")
+            return "需要指明切换路径"
         else:
             path = path
             cmd = "CWD " + path + "\n"
@@ -167,7 +163,7 @@ class ConnftpClient:
         :return: 在当前工作路径下创建目录
         """
         if path is None or path == "":
-            print("需要指明创建目录；Usage: mkdir [path]")
+            return "需要指明创建目录；Usage: mkdir [path]"
         else:
             path = path
             cmd = "MKD " + path + "\n"
@@ -176,11 +172,9 @@ class ConnftpClient:
                 for i in range(2):
                     res = self.client.recv(self.buffer).decode()
                     if res.startswith("257"):
-                        print(res.strip("\r\n"))
-                        break
+                        return res.strip("\r\n")
                     elif res.startswith("550"):
-                        print(res.strip("\r\n"))
-                        break
+                        return res.strip("\r\n")+", please check {} is exists".format(path)
             except Exception as e:
                 pass
 
@@ -190,7 +184,7 @@ class ConnftpClient:
         :return: 在当前工作路径下删除目录
         """
         if path is None or path == "":
-            print("需要指明删除目录；Usage: mkdir [path]")
+            return "需要指明删除目录；Usage: mkdir [path]"
         else:
             path = path
             cmd = "RMD " + path + "\n"
@@ -199,11 +193,9 @@ class ConnftpClient:
                 for i in range(2):
                     res = self.client.recv(self.buffer).decode()
                     if res.startswith("250"):
-                        print(res.strip("\r\n"))
-                        break
+                        return path + " " + res.strip("\r\n")
                     elif res.startswith("550"):
-                        print(res.strip("\r\n"))
-                        break
+                        return res.strip("\r\n") + ", please check {} is exists".format(path)
             except Exception as e:
                 pass
 
@@ -213,7 +205,7 @@ class ConnftpClient:
         :return: 删除当前路径的某个文件
         """
         if filename is None or filename == "":
-            print("需要指明删除文件名; Usage: delete [filename] ")
+            return "需要指明删除文件名; Usage: delete [filename] "
         else:
             filename = filename
         cmd = "DELE " + filename + "\n"
@@ -222,11 +214,9 @@ class ConnftpClient:
             for i in range(2):
                 res = self.client.recv(self.buffer).decode()
                 if res.startswith("250"):
-                    print(res.strip("\r\n"))
-                    break
+                    return res.strip("\r\n")
                 elif res.startswith("550"):
-                    print(res.strip("\r\n"))
-                    break
+                    return res.strip("\r\n") + ", please check {} is exists".format(filename)
         except Exception as e:
             pass
 
@@ -254,7 +244,7 @@ class ConnftpClient:
         :return: 下载文件数据流
         """
         if filename is None or filename == "":
-            print("请指明需要下载的文件; Usage: get [filename]")
+            return "请指明需要下载的文件; Usage: get [filename]"
         else:
             filename = filename
         cmd = "RETR " + filename + "\n"
@@ -266,7 +256,7 @@ class ConnftpClient:
         :return:  上传文件数据流
         """
         if filename is None or filename == "":
-            print("请指明需要上传的文件; Usage: put [filename]")
+            return "请指明需要上传的文件; Usage: put [filename]"
         else:
             filename = filename
         cmd = "STOR " + filename + "\n"
@@ -409,25 +399,25 @@ class localOpt():
         :return: 上传 or 下载文件是否正常
         """
         if int(local_szie) == int(remote_size):
-            print("{}文件传输正常，大小为{}字节".format(filename, local_szie))
+            return "{}文件传输正常，大小为{}字节".format(filename, local_szie)
         else:
-            print("{}文件传输异常，大小差异为{}字节".format(filename, int(remote_size) - int(local_szie)))
+            return "{}文件传输异常，大小差异为{}字节".format(filename, int(remote_size) - int(local_szie))
 
 
-def main():
+def main(cmd):
     ftp_host = "39.105.101.140"
     ftp_port = "21"
     ConnClient = ConnftpClient(ftp_host, ftp_port)
     ConnClient._connftp()
     ConnClient._login_ftp()
-    cmd = "pwd"
+    cmd = cmd
     if cmd.startswith("ls"):
         if len(cmd.split(" ")) == 1:
             path = None
         elif len(cmd.split(" ")) == 2:
             path = cmd.split(" ")[1]
         else:
-            print("请指定一个目录进行查询; Usage: ls [path]")
+            return "请指定一个目录进行查询; Usage: ls [path]"
         trans_port_rsp = ConnClient._login_mode()
         ConnClient.list_files(path)
         DataClient = DataFtpClient(ftp_host, trans_port_rsp)
@@ -441,18 +431,18 @@ def main():
         except Exception as e:
             pass
         finally:
-            print(res)
             DataClient.quit()
+            return res
     elif cmd.startswith("get"):
         if len(cmd.split(" ")) == 1:
-            filename = None
+            return "请指定需要下载的文件; Usage: get [filename]"
         elif len(cmd.split(" ")) == 2:
             filename = cmd.split(" ")[1]
         else:
-            print("请指定需要下载的文件; Usage: get [filename]")
+            return "请指定需要下载的文件; Usage: get [filename]"
         remote_size = ConnClient.get_size(filename)
         if remote_size is None or remote_size == "":
-            print("请确认文件{}是否存在".format(filename))
+            return "请确认文件{}是否存在".format(filename)
         else:
             trans_port_rsp = ConnClient._login_mode()
             ConnClient.get_file(filename)
@@ -472,11 +462,12 @@ def main():
                 DataClient.quit()
     elif cmd.startswith("put"):
         if len(cmd.split(" ")) == 1:
-            filename = None
+            return "请指定需要上传的文件; Usage: put [filename]"
         elif len(cmd.split(" ")) == 2:
             filename = cmd.split(" ")[1]
         else:
-            print("请指定需要上传的文件; Usage: put [filename]")
+            res = "请指定需要上传的文件; Usage: put [filename]"
+            return res
         if localOpt.local_file_exists(filename):
             local_size = localOpt.get_local_file_size(filename)
             trans_port_rsp = ConnClient._login_mode()
@@ -492,37 +483,40 @@ def main():
 
     elif cmd == "pwd":
         res = ConnClient.get_path()
-        return  res
+        return res
     elif cmd == "help":
-        ConnClient.help()
+        help_msg = ConnClient.help()
+        return help_msg
     elif cmd.startswith("cd"):
         if len(cmd.split(" ")) == 2:
             path = cmd.split(" ")[1]
             res = ConnClient.cwd(path)
-            print(res)
+            return res
         else:
-            print("请指定一个目录进行切换")
+            return "请指定一个目录进行切换"
     elif cmd.startswith("mkdir"):
         if len(cmd.split(" ")) == 2:
             path = cmd.split(" ")[1]
-            ConnClient.mkdir(path)
+            res = ConnClient.mkdir(path)
+            return res
         else:
-            print("需要指明创建路径; Usage: mkdir [path]")
+            return "需要指明创建路径; Usage: mkdir [path]"
     elif cmd.startswith("rmdir"):
         if len(cmd.split(" ")) == 2:
             path = cmd.split(" ")[1]
-            ConnClient.rmdir(path)
+            res = ConnClient.rmdir(path)
+            return res
         else:
-            print("需要指明删除目录; Usage: rmdir [path]")
+            return "需要指明删除目录; Usage: rmdir [path]"
     elif cmd.startswith("delete"):
         if len(cmd.split(" ")) == 2:
             filename = cmd.split(" ")[1]
-            ConnClient.delete(filename)
+            res = ConnClient.delete(filename)
+            return res
         else:
-            print("需要指明删除文件名; Usage: delete [filename]")
+            return "需要指明删除文件名; Usage: delete [filename]"
     elif cmd == "quit" or cmd == "bye":
         ConnClient.quit()
-        print("221 Goodbye.")
+        return "221 Goodbye."
     else:
-        print("无效命令，请输入help进行查看")
-main()
+        return "无效命令，请输入help进行查看"
