@@ -15,10 +15,16 @@ def login():
         return render_template("login.html")
     username = request.form.get("username")
     password = request.form.get("password")
-    if username == "wtc" and password == "wtc.com":
+    ftphost = request.form.get("ftphost")
+    ftpport = request.form.get("ftpport")
+    if username != "wtc":
+        return render_template("login.html",msg="用户名错误")
+    elif password != "wtc.com":
+        return render_template("login.html", msg="密码错误")
+    elif ftphost != '1.1.1.1' or ftpport != '21':
+        return render_template("login.html", msg="ftp连接异常")
+    elif username == "wtc" and password == "wtc.com" and ftphost == "1.1.1.1" and ftpport == "21":
         return redirect("/index")
-    else:
-        return render_template("login.html",msg="error")
 
 @app.route('/index', methods=['GET', 'POST'])
 def index():
