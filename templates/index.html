@@ -1,48 +1,91 @@
 <script src="https://cdn.staticfile.org/jquery/1.10.2/jquery.min.js"></script>
 <script>
-$(document).ready(function () {
-    $('form').submit(function (e) {
+  $(document).ready(function () {
+    /**
+     * @param data 需要保存的内容
+     * @param name 保存的文件名
+     */
+    function savefiles(data, name) {
+      //Blob为js的一个对象，表示一个不可变的, 原始数据的类似文件对象，这是创建文件中不可缺少的！
+      var urlObject = window.URL || window.webkitURL || window;
+      var export_blob = new Blob([data]);
+      var save_link = document.createElementNS("http://www.w3.org/1999/xhtml", "a")
+      save_link.href = urlObject.createObjectURL(export_blob);
+      save_link.download = name;
+      save_link.click();
+    }
+    $('#command_form').submit(function (e) {
       e.preventDefault()
       console.log($('#command_form').serialize())
       $.ajax({
         //几个参数需要注意一下
-        type: 'POST', //方法类型
+        type: $('#cmd').val().startsWith('get') ? 'PUT' : 'POST',
         dataType: 'json', //预期服务器返回的数据类型
         url: '/index', //url
         data: $('#command_form').serialize(),
         success: function (result) {
-          console.log(result)
+          console.log('result >>>', result)
           $('#textarea').val(result)
         },
+        error: e => {
+          const disposition = e.getResponseHeader('content-disposition') || ''
+          const filename = disposition.split(/;(.+)/)[1]?.split?.(/=(.+)/)[1] || ''
+          savefiles(e.responseText, filename)
+        }
       })
+    })
+
+    $('#command_put').submit(e => {
+      e.preventDefault()
+      const formData = new FormData();
+      // 获取文件
+      const fileData = $("#file").prop("files")[0];
+      formData.append("filename", fileData);
+      $.ajax({
+        url: '/upload',
+        type: 'POST',
+        async: false,
+        data: formData,
+        cache: false,
+        contentType: false,
+        processData: false,
+        // success: function (result) {
+        //   console.log(result)
+        //   $('#textarea').val(result)
+        // },
+        error: e => {
+          $('#textarea').val(e.responseText)
+          console.log(e.responseText)
+        },
+      });
     })
   })
 </script>
 <div>
-    <div >
-        <h3>执行命令</h3>
-        <form id="command_form" method="POST" action="/">
-            <div>
-                <input name="cmd" type="text" placeholder="命令" value="{{ cmd }}" />
-                <span>
-                    <input name="submit"type="submit" value="执行" />
-                </span>
-            </div>
-        </form>
-    </div>
-    <div >
-        <h3>上传文件</h3>
-        <form id="command_put" method="POST" action="/">
-            <div>
-                <input name="filename" type="file" />
-                <input name="submit" type="submit" value="上传" />
-            </div>
-        </form>
-    </div>
-    <div id="result">
-        <h3>命令结果</h3>
-        <textarea rows="20" cols="100" id="textarea">
+  <div>
+    <h3>执行命令</h3>
+    <form id="command_form">
+      <div>
+        <input id="cmd" name="cmd" type="text" placeholder="命令" value="{{ cmd }}" />
+        <span>
+          <input name="submit" type="submit" value="执行" />
+        </span>
+      </div>
+    </form>
+  </div>
+  <div>
+    <h3>上传文件</h3>
+    <form id="command_put">
+      <div>
+        <input name="filename" type="file" id="file" />
+        <input name="submit" type="submit" value="上传" />
+      </div>
+    </form>
+  </div>
+  <div id="result">
+    <h3>命令结果</h3>
+    <textarea rows="20" cols="100" id="textarea">
                 {{ result }}
         </textarea>
-    </div>
+  </div>
 </div>
