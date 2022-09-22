@@ -507,7 +507,7 @@ def main(cmd):
             res = ConnClient.rmdir(path)
             return res
         else:
-            return "需要指明删除目录; Usage: rmdir [path]"
+            return "需要指明删除目录;  Usage: rmdir [path]"
     elif cmd.startswith("delete"):
         if len(cmd.split(" ")) == 2:
             filename = cmd.split(" ")[1]

@@ -64,9 +64,5 @@ def upload():
     else:
         return render_template('index.html')
 
-@app.route("/download", methods=['GET'])
-def download_file(filename):
-    return send_from_directory("/home/wangtianci/test/", "client.py", as_attachment=True)
-
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8888, debug=True)
